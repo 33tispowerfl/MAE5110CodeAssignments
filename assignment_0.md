@@ -39,7 +39,7 @@ In this class, we will use [uv](https://docs.astral.sh/uv/) as our environment m
 
 If you're not familiar with environment managers, or why they are important, see [here](https://xkcd.com/1987/), and in all seriousness, read the _Why_ and _How_ sections [here](https://realpython.com/python-virtual-environments-a-primer/?utm_source=chatgpt.com#why-do-you-need-virtual-environments).
 
-## Pendulum simulation
+## s simulation
 _Before_ running the code: read through the pendulum simulation in `assignment_0.py`, and predict what you expect to happen. Then run it.
 
 Set up the [Python debugger in VS Code](https://code.visualstudio.com/docs/python/debugging), and step through the code, using the debugger to follow the codeflow into different parts of the code. Yes, this codebase is tiny and you don't really need to do this to understand where things are implemented; in more complex code-bases (e.g. the RL codebase you will work with in this class), following through the codeflow once with the debugger is a good habit to have.
