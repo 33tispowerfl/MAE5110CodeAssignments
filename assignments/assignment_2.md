@@ -17,7 +17,7 @@
 ## Model: the Rimless Wheel
 
 This week's model is a slight variation of the rimless wheel that introduces two control inputs: $u = \left[u_1, u_2 \right] = \left[\tau, \alpha \right]$, where $\tau$ is a small torque that can be applied to the pivot joint of the pendulum (the "ankle"), and $\alpha$ is half the angle between stance and swing legs, just like in the rimless wheel.
-Your task will be to solve for a policy that, given a specific slope incline $\gamma$, will bring the walker to a standing equilibrium in as few steps as possible.
+Your task will be to solve for a policy that, for a slope incline $\gamma = 0.06$ rad, will bring the walker to a standing equilibrium in as few steps as possible.
 
 We're still going to model stance as a simple inverted pendulum, but instead of defining the angle $\alpha$ between the stance and swing leg by the number of spokes in a rimless wheel, we will treat that angle as a control input that can be freely chosen once per stance phase.
 In other words, you'll implement a continuous-time balancing controller with $u_1 = \tau$ in the integration loop of the pendulum dynamics, and separately a discrete-time step controller for the discrete-time Poincaré map dynamics.
@@ -35,7 +35,7 @@ Since we are calling the integrator in the experiment script for each timestep, 
 Create a new model, `InvertedPendulumWalker`, based on the rimless wheel, and add parameter indicating the ankle torque `ankle_torque`, which should be summed to the pendulum dynamics (set this as 0 by default). The rest of the continuous-time dynamics shouldn't need to change.
 
 We will create a policy that chooses the next landing angle of attack $\alpha$ once per step, and the ankle torque $\tau$ at every simulation timestep.
-In your script, you'll also define the following bounds: $\alpha \in \left[ \frac{\pi}{8}, \frac{\pi}{3} \right]$, and $\tau \in \left[-0.1mg\ell, 0.05mg \ell \right ]$, which your controller will need to respect.
+In your script, you'll also define the following bounds: $\alpha \in \left[ \frac{\pi}{8}, \frac{\pi}{7} \right]$, and $\tau \in \left[-0.1mg\ell, 0.05mg \ell \right ]$, which your controller will need to respect.
 
 ### Stabilize the upright equilibrium with Feedback Linearization
 
