@@ -32,10 +32,41 @@ Instead, we'll do something simpler and more flexible: keep `dynamics(t, state, 
 This way, you can easily change which parameters to choose as control inputs without changing your implementation.
 Since we are calling the integrator in the experiment script for each timestep, the controller will live at the same level and can be modified in the script directly.
 
-Create a new model, `InvertedPendulumWalker`, based on the rimless wheel, and add parameter indicating the ankle torque `ankle_torque`, which should be summed to the pendulum dynamics (set this as 0 by default). The rest of the continuous-time dynamics shouldn't need to change.
+Complete the model functions in the code stub [`models/inverted_pendulum_walker.py`](../models/inverted_pendulum_walker.py), based on the rimless wheel, and add parameter indicating the ankle torque `ankle_torque`, which should be summed to the pendulum dynamics (set this as 0 by default). The rest of the continuous-time dynamics shouldn't need to change.
 
 We will create a policy that chooses the next landing angle of attack $\alpha$ once per step, and the ankle torque $\tau$ at every simulation timestep.
 In your script, you'll also define the following bounds: $\alpha \in \left[ \frac{\pi}{8}, \frac{\pi}{7} \right]$, and $\tau \in \left[-0.1mg\ell, 0.05mg \ell \right ]$, which your controller will need to respect.
+
+### Visualizing the walker
+
+The code stub includes `visualize(state, params)`, which draws the walker without calling your dynamics. The state is `[theta, angular_velocity]`, with `theta` measured clockwise from upward vertical. It uses `length`, `incline`, and `angle_of_attack` (half the inter-leg angle) from your parameter dictionary, and displays `ankle_torque` if supplied. All angles are in radians. Note, you may need to rename your params (or modify the visualizer code) to match.
+
+```python
+import matplotlib.pyplot as plt
+from models import inverted_pendulum_walker as model
+
+# your experiment code
+
+ax = model.visualize(state, params)
+plt.show()
+```
+
+For a sequence of images, reuse the axes. Here `states` has shape `(2, N)`, and `params_history[i]` holds a copy of the parameters used at sample `i`, including the chosen step angle and ankle torque. `show_swing_history[i]` says whether to draw the swing leg at that sample; set it to `False` while the leg is held clear or while balancing. The visualizer draws a straight swing leg at the supplied angle; it does not invent a swing trajectory.
+
+```python
+from pathlib import Path
+
+frames = Path("output/walker_frames")
+frames.mkdir(parents=True, exist_ok=True)
+fig, ax = plt.subplots(figsize=(6, 6), layout="constrained")
+for i in range(states.shape[1]):
+    model.visualize(states[:, i], params_history[i], ax=ax,
+                    show_swing=show_swing_history[i])
+    fig.savefig(frames / f"frame_{i:05d}.png", dpi=120)
+plt.close(fig)
+```
+
+Sample at evenly spaced simulation times for a video with a fixed frame rate. You can also call the same visualizer from `matplotlib.animation.FuncAnimation` to save a GIF or video directly. The default view places the current stance foot at the origin, so it recenters at impact. For a view of the walker moving through the world, supply `stance_position=(x, y)` and fixed `view_limits=(xmin, xmax, ymin, ymax)`; see the function's docstring. Below-ground geometry is shown in red to help debug your simulation.
 
 ### Stabilize the upright equilibrium with Feedback Linearization
 
