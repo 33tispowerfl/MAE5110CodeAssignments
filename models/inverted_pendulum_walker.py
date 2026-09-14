@@ -13,7 +13,8 @@ def generate_params():
 
 
 def dynamics(t, state, params):
-    pass
+    # TODO: implement the state derivative.
+    return np.array([0.0, 0.0])
 
 
 def event_guard(previous_state, next_state, params):
