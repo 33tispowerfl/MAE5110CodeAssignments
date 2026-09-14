@@ -69,8 +69,7 @@ def visualize(
 
     Notes
     -----
-    Geometry below the ground is drawn in red, not clipped or corrected. This
-    is a pose drawing, not a collision detector or a check of trajectory history.
+    Draws the supplied pose; contact events belong in the simulation.
     Reuse ax for frame sequences; use evenly spaced simulation times for playback
     at a fixed frame rate, and pass the parameters actually used at each frame.
     """
@@ -118,10 +117,6 @@ def visualize(
     ax.clear()
     theta, angular_velocity = state
     hub = foot + length * np.array([np.sin(theta), np.cos(theta)])
-    normal = np.array([np.sin(incline), np.cos(incline)])
-    tolerance = 1e-10 * length
-    hub_below_ground = (hub - foot) @ normal < -tolerance
-    warning = ["Hub below ground"] if hub_below_ground else []
 
     ground_x = np.array(limits[:2])
     ground_y = foot[1] - np.tan(incline) * (ground_x - foot[0])
@@ -139,10 +134,7 @@ def visualize(
     if show_swing:
         swing_angle = theta - 2 * angle_of_attack
         swing_foot = hub - length * np.array([np.sin(swing_angle), np.cos(swing_angle)])
-        swing_below_ground = (swing_foot - foot) @ normal < -tolerance
-        swing_color = "#bf3030" if swing_below_ground else "#df8a25"
-        if swing_below_ground:
-            warning.append("Swing foot below ground")
+        swing_color = "#df8a25"
         ax.plot(
             [hub[0], swing_foot[0]],
             [hub[1], swing_foot[1]],
@@ -161,7 +153,7 @@ def visualize(
             label="Swing foot",
         )
 
-    stance_color = "#bf3030" if hub_below_ground else "#23699b"
+    stance_color = "#23699b"
     ax.plot(
         [foot[0], hub[0]],
         [foot[1], hub[1]],
@@ -191,17 +183,6 @@ def visualize(
         fontsize=10,
         bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.85},
     )
-    if warning:
-        ax.text(
-            0.5,
-            0.03,
-            " / ".join(warning),
-            transform=ax.transAxes,
-            ha="center",
-            color="#a12222",
-            fontsize=10,
-            bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.85},
-        )
     ax.set(
         xlim=limits[:2],
         ylim=limits[2:],
