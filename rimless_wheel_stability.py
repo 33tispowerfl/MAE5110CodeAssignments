@@ -105,7 +105,7 @@ def integrate_to_impact_rk4(initial_state, params, maximum_time):
 
     while time < maximum_time:
         step_size = min(timestep, maximum_time - time)
-        next_state = rk4.step(model.dynamics, time, state, step_size, params)
+        next_state = rk4(model.dynamics, time, state, step_size, params)
         next_guard = model.impact_guard(time + step_size, next_state, params)
 
         if current_guard < 0.0 and next_guard >= 0.0:
@@ -117,7 +117,7 @@ def integrate_to_impact_rk4(initial_state, params, maximum_time):
 
             for _ in range(20):
                 middle_time = 0.5 * (lower_time + upper_time)
-                middle_state = rk4.step(
+                middle_state = rk4(
                     model.dynamics, time, state, middle_time, params
                 )
                 middle_guard = model.impact_guard(
@@ -129,7 +129,7 @@ def integrate_to_impact_rk4(initial_state, params, maximum_time):
                 else:
                     upper_time = middle_time
 
-            impact_state = rk4.step(
+            impact_state = rk4(
                 model.dynamics, time, state, upper_time, params
             )
             impact_state[0] = params["slope"] + params["alpha"]
@@ -272,7 +272,7 @@ def sample_limit_cycle(fixed_point, params, timestep=0.002):
     time = 0.0
 
     while time < 10.0:
-        next_state = rk4.step(model.dynamics, time, state, timestep, params)
+        next_state = rk4(model.dynamics, time, state, timestep, params)
         next_guard = model.impact_guard(time + timestep, next_state, params)
 
         if next_guard >= 0.0:

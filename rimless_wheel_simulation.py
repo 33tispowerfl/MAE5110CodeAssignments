@@ -61,7 +61,7 @@ for step, t in enumerate(time_traj[:-1]):
 
     current_state = state_traj[:, step]
 
-    next_state = integrator.step(
+    next_state = integrator(
         model.dynamics,
         t,
         current_state,

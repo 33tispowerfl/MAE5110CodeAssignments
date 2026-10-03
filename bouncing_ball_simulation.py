@@ -16,7 +16,7 @@ state_traj = np.zeros((2, n_timesteps))
 state_traj[:, 0] = initial_state
 
 for step, t in enumerate(time_traj[:-1]):
-    next_state = integrator.step(
+    next_state = integrator(
         model.dynamics,
         t,
         state_traj[:, step],
