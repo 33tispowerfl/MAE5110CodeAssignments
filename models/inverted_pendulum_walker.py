@@ -8,25 +8,80 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def generate_params():
-    pass
+def generate_params(*, incline=0.06):
+    params = {
+        "gravity": 9.81,  # gravitational acceleration (m/s^2)
+        "length": 1.0,  # rod length (m)
+        "mass": 1.0,  # point mass at end of rod (kg)
+        "incline": incline,  # slope inclination angle (rad)
+        "angle_of_attack": np.pi / 8,  # half angle between stance and swing legs
+        "ankle_torque": 0.0,  # stance-ankle torque (N m), positive along theta
+    }
+    return params
+
+
+def generate_initial_condition():
+    return np.array([0.0, 3.0])  # [theta (rad), angular velocity (rad/s)]
 
 
 def dynamics(t, state, params):
-    # TODO: implement the state derivative.
-    return np.array([0.0, 0.0])
+    g = params["gravity"]
+    l = params["length"]
+    tau = params["ankle_torque"]
+    m = params["mass"]
+
+    theta = state[0]
+    theta_dot = state[1]
+
+    theta_ddot = (g / l) * np.sin(theta) + tau / (m * (l**2))
+
+    state_derivative = np.array([theta_dot, theta_ddot])
+
+    return state_derivative
 
 
 def event_guard(previous_state, next_state, params):
-    pass
+    """Return True where a forward swing crosses the touchdown angle.
+
+    Works for single (2,) states and (2, N) batches; ``angle_of_attack`` may be
+    a scalar or one value per column.
+    """
+    theta = previous_state[0]
+    next_theta, next_theta_dot = next_state[0], next_state[1]
+    theta_touchdown = params["incline"] + params["angle_of_attack"]
+    return (
+        (theta < theta_touchdown)
+        & (theta_touchdown <= next_theta)
+        & (next_theta_dot > 0)
+    )
 
 
 def event_dynamics(state, params):
-    pass
+    """Apply the touchdown reset to (2,) or (2, N) pre-impact states."""
+    theta_dot = np.asarray(state, dtype=float)[1]
+    gamma = params["incline"]
+    alpha = params["angle_of_attack"]
+
+    theta_plus = gamma - alpha
+    theta_dot_plus = np.cos(2 * alpha) * theta_dot
+    return np.stack(np.broadcast_arrays(theta_plus, theta_dot_plus))
 
 
 def calculate_energy(state, params):
-    pass
+    """Return (kinetic, potential) energies in joules for (2,) or (2, N) states.
+
+    Potential energy is measured relative to the current stance foot's height.
+    Comparing it across downhill impacts requires accounting for the change
+    in stance-foot height, which is not tracked by this two-state model.
+    """
+    theta, angular_velocity = np.asarray(state, dtype=float)
+    mass = params["mass"]
+    length = params["length"]
+    gravity = params["gravity"]
+
+    kinetic_energy = 0.5 * mass * (length * angular_velocity) ** 2
+    potential_energy = mass * gravity * length * np.cos(theta)
+    return kinetic_energy, potential_energy
 
 
 def visualize(

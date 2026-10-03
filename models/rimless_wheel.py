@@ -36,6 +36,16 @@ def generate_params():
     return params
 
 
+def generate_initial_condition():
+    """Return a post-impact state rolling forward down the slope."""
+    params = generate_params()
+
+    angle = params["slope"] - params["alpha"]  # theta = gamma - alpha
+    angular_velocity = 1.0  # (rad/s)
+
+    return np.array([angle, angular_velocity])
+
+
 def impact_guard(t, state, params):
     """Return zero when the next spoke contacts the ground."""
     angle = state[0]

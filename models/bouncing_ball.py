@@ -9,6 +9,10 @@ def generate_params():
     }
 
 
+def generate_initial_condition():
+    return np.array([2.0, 0.0])  # [height (m), velocity (m/s)]
+
+
 def dynamics(t, state, params):
     height, velocity = state
     return np.array([velocity, -params["gravity"]])
