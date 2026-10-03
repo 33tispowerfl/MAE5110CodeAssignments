@@ -1,10 +1,14 @@
-# Pendulum swing-up with value iteration
+# %% [markdown]
+# ## Pendulum swing-up with value iteration
 #
 # From the repository root, run `uv run scripts/example_value_iteration.py`.
 # Build a transition matrix, solve for a torque policy, and simulate the
 # continuous pendulum using that policy.
 
-# Imports
+# %% [markdown]
+# ### Setup
+
+# %% Setup
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -15,7 +19,6 @@ from algorithms import build_transition_matrix, value_iteration
 from integrators import rk4 as integrator
 from models import pendulum as model
 
-# Parameters and grid
 params = model.generate_params()
 initial_state = np.array([-np.pi, 0.0])  # start hanging down, at rest
 timestep = 0.01  # integration substep (s)
@@ -35,8 +38,10 @@ points = grid_points.reshape(-1, 2)
 lower = points.min(axis=0)
 upper = points.max(axis=0)
 
+# %% [markdown]
+# ### Value iteration
 
-# Build the transition matrix
+# %% Value iteration
 def step(state, torque):
     """Advance one control interval with constant torque, wrapping the angle."""
     step_params = params.copy()
@@ -51,7 +56,6 @@ def step(state, torque):
 
 transition_matrix = build_transition_matrix(grid_points, actions, step)
 
-# Reward and value iteration
 # Reward depends only on the current state: 1 at upright equilibrium, 0 elsewhere.
 upright = np.all(np.isclose(grid_points, [0.0, 0.0]), axis=-1)
 reward = np.zeros_like(transition_matrix, dtype=float)
@@ -59,7 +63,10 @@ reward[upright] = 1.0  # the same state reward for every action
 
 value, policy = value_iteration(transition_matrix, reward, discount=discount)
 
-# Simulate the policy on the continuous pendulum
+# %% [markdown]
+# ### Simulation
+
+# %% Simulation
 if np.any(initial_state < lower) or np.any(initial_state > upper):
     raise ValueError("Choose an initial state inside the grid domain.")
 time_traj = np.arange(round(sim_time / timestep) + 1) * timestep
@@ -92,7 +99,10 @@ print(
     f"angular velocity: {state_traj[1, -1]:.4f} rad/s."
 )
 
-# Plot the value, policy, and continuous trajectory
+# %% [markdown]
+# ### Visualization
+
+# %% Visualization
 output = Path("output/value_iteration")
 output.mkdir(parents=True, exist_ok=True)
 fig, axes = plt.subplots(2, 2, figsize=(11, 8), layout="constrained")
